@@ -1,31 +1,46 @@
 package ru.itmentor.spring.boot_security.demo.configs;
 
-import org.springframework.boot.CommandLineRunner;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 import ru.itmentor.spring.boot_security.demo.models.Role;
+import ru.itmentor.spring.boot_security.demo.models.User;
 import ru.itmentor.spring.boot_security.demo.repositories.RoleRepository;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import ru.itmentor.spring.boot_security.demo.services.UserService;
+
+import javax.annotation.PostConstruct;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Component
-public class DataInitializer implements CommandLineRunner {
-
+@RequiredArgsConstructor
+public class DataInitializer {
+    private final UserService userService;
     private final RoleRepository roleRepository;
+    private final AdminProperties adminProperties;
+    private final PasswordEncoder passwordEncoder;
 
-    public DataInitializer(RoleRepository roleRepository) {
-        this.roleRepository = roleRepository;
-    }
+    @PostConstruct
+    public void init() {
+        Set<Role> roles = adminProperties.getRoles().stream()
+                .map(roleName -> {
+                    String fullName = roleName.startsWith("ROLE_") ? roleName : "ROLE_" + roleName;
+                    return roleRepository.findByName(fullName).orElseGet(() -> {
+                        Role role = new Role();
+                        role.setName(fullName);
+                        return roleRepository.save(role);
+                    });
+                })
+                .collect(Collectors.toSet());
 
-    @Override
-    @Transactional
-    public void run(String... args) {
-        if (roleRepository.count() == 0) {
-            Role adminRole = new Role();
-            adminRole.setName("ADMIN");
-            roleRepository.save(adminRole);
+        if (!userService.existsByUsername(adminProperties.getUsername())) {
+            User admin = new User();
+            admin.setUsername(adminProperties.getUsername());
+            admin.setPassword(passwordEncoder.encode(adminProperties.getPassword()));
+            admin.setEmail(adminProperties.getEmail());
+            admin.setRoles(roles);
 
-            Role userRole = new Role();
-            userRole.setName("USER");
-            roleRepository.save(userRole);
+            userService.save(admin);
         }
     }
 }

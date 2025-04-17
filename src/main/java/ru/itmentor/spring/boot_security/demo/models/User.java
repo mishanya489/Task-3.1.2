@@ -3,16 +3,17 @@ package ru.itmentor.spring.boot_security.demo.models;
 
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import javax.persistence.*;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Data
 @Entity
-@Builder
 @Table(name = "users")
 @NoArgsConstructor
 @AllArgsConstructor
@@ -28,6 +29,7 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private String password;
 
+    @Column(unique = true, nullable = false)
     private String email;
 
     @ManyToMany(fetch = FetchType.EAGER)
@@ -49,7 +51,9 @@ public class User implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return roles;
+        return roles.stream()
+                .map(role -> new SimpleGrantedAuthority(role.getName()))
+                .collect(Collectors.toSet());
     }
 
     @Override

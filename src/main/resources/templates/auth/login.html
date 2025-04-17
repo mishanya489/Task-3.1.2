@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="">
+<head>
+    <meta charset="UTF-8">
+    <title>Login</title>
+    <style>
+        /* ... (ваши стили остаются без изменений) ... */
+        .error {
+            color: red;
+            text-align: center;
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+<h1>Login</h1>
+<div th:if="${param.error}" class="error">Неверное имя пользователя или пароль</div>
+<form th:action="@{/auth/login}" method="post" th:object="${userDto}">
+    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+    <label>
+        <input type="text" th:field="*{username}" placeholder="Username" required>
+    </label>
+    <label>
+        <input type="password" th:field="*{password}" placeholder="Password" required>
+    </label>
+    <button type="submit">Войти</button>
+</form>
+<a th:href="@{/auth/register}">У вас нет аккаунта. Зарегистрироваться?</a>
+</body>
+</html>

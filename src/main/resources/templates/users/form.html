@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="">
+<head>
+    <meta charset="UTF-8">
+    <title>Создать пользователя</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 500px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        h1 {
+            color: #333;
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        input, select {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        button {
+            padding: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        .roles-group {
+            border: 1px solid #ddd;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 15px 0;
+        }
+        .role-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 5px 0;
+        }
+        .error {
+            color: red;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+<h1>Создать пользователя</h1>
+<form th:action="@{/users}" method="post" th:object="${user}">
+    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+
+    <!-- Логин -->
+    <div>
+        <label>Логин:</label>
+        <input type="text" th:field="*{username}" placeholder="Введите логин" required>
+        <div th:if="${#fields.hasErrors('username')}" class="error" th:errors="*{username}"></div>
+    </div>
+
+    <!-- Email -->
+    <div>
+        <label>Email:</label>
+        <input type="email" th:field="*{email}" placeholder="Введите email" required>
+        <div th:if="${#fields.hasErrors('email')}" class="error" th:errors="*{email}"></div>
+    </div>
+
+    <!-- Пароль -->
+    <div>
+        <label>Пароль:</label>
+        <input type="password" th:field="*{password}" placeholder="Введите пароль" required>
+        <div th:if="${#fields.hasErrors('password')}" class="error" th:errors="*{password}"></div>
+    </div>
+
+    <!-- Выбор ролей -->
+    <div class="roles-group">
+        <h3>Роли:</h3>
+        <div th:each="role : ${allRoles}" class="role-item">
+            <input type="checkbox"
+                   th:id="${'role_' + role.id}"
+                   name="roleIds"
+                   th:value="${role.id}">
+            <label th:for="${'role_' + role.id}" th:text="${role.name}"></label>
+        </div>
+    </div>
+
+    <button type="submit">Создать</button>
+</form>
+<a th:href="@{/users}">Назад к списку</a>
+</body>
+</html>

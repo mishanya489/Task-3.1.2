@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="">
+<head>
+    <meta charset="UTF-8">
+    <title>Редактировать пользователя</title>
+    <style>
+        /* ... (ваши стили остаются без изменений) ... */
+    </style>
+</head>
+<body>
+<h1>Редактировать пользователя</h1>
+
+<form th:action="@{/users/update/{id}(id=${user.id})}" method="post">
+    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+
+    <!-- Основные поля -->
+    <input type="text" name="username" th:value="${user.username}" required>
+    <input type="email" name="email" th:value="${user.email}" required>
+
+    <!-- Пароль (необязательный) -->
+    <input type="password" name="password" placeholder="Новый пароль">
+
+    <!-- Роли -->
+    <div th:each="role : ${allRoles}">
+        <input type="checkbox"
+               name="roleIds"
+               th:value="${role.id}"
+               th:checked="${#lists.contains(user.roles, role)}">
+        <label th:text="${role.name}"></label>
+    </div>
+
+    <button type="submit">Сохранить</button>
+</form>
+</body>
+</html>
